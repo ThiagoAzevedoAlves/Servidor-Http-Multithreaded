@@ -5,12 +5,8 @@
 
 using namespace std;
 
+void conectar(void *sockk);
 void *comunicar(int socket);
-void *conectar(void *sockk){
-			struct sock *socket;
-			socket=(struct sock*)sockk;
-			return comunicar(socket->new_socket);
-}
 int verificaMetodo(string &metodo);
 int verificaProtocolo(string &protocolo);
 void montaCabecalho(string &protocolo, string &codigo, string &descricao, string &mensagem, int &socket, string &type, int erro);

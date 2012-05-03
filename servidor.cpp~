@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <netdb.h>
-#include <netinet/in.h>
 #include <sstream>
 #include "servidor.h"
 
@@ -55,8 +54,9 @@ int main(int argc, char *argv[]){
 		}else{
 			cout << "Conexao estabelecida." << endl;
 		}
-		pthread_t thread;
-		pthread_create(&thread, NULL, &conectar, (void*)novosock);
+		//pthread_t thread;
+		//pthread_create(&thread, NULL, conectar, (void*)novosock);
+		conectar((void*)novosock);
 	}
 }
 

@@ -12,8 +12,6 @@
 #include <sstream>
 #include "servidor.h"
 
-#define TAM 1000
-
 using namespace std;
 
 int main(int argc, char *argv[]){
@@ -54,8 +52,9 @@ int main(int argc, char *argv[]){
 		}else{
 			cout << "Conexao estabelecida." << endl;
 		}
-		pthread_t thread;
-		pthread_create(&thread, NULL, &conectar, (void*)novosock);
+		//pthread_t thread;
+		//pthread_create(&thread, NULL, conectar, (void*)novosock);
+		conectar((void*)novosock);
 	}
 }
 

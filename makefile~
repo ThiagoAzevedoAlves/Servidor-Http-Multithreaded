@@ -1,6 +1,6 @@
 exe: servidor.o
-	g++ -o exe servidor.o
+	g++ -o exe servidor.o -lpthread
 servidor.o: servidor.cpp servidor.h
-	g++ -Wall -c servidor.cpp
+	g++ -c servidor.cpp
 clean:
-	rm exe servidor.o
+	rm exe servidor.o metodos.o

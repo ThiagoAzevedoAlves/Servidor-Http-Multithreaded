@@ -1,11 +1,28 @@
 #include "servidor.h"
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <vector>
 #include <string>
+#include <sys/types.h> 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <netdb.h>
+#include <sstream>
 
-void comunicar(int socket){
+
+#define TAM 1000
+
+using namespace std;
+
+void *comunicar(int socket){
+	char mensagem[TAM+1];	
 	bool b, erro;
-	int i, len;
-	char mensagem[TAM+1];
-	string metodo, truk, resto, protocolo, tipo, tprotocolo, codigo, descrição, msg;
+	int i, len, m;
+	string metodo, truk, resto, protocolo, tipo;
+	string tprotocolo, codigo, descricao, msg;	
 	vector<string> linhas;
 	istringstream buffer;
 	
@@ -38,7 +55,7 @@ void comunicar(int socket){
 		strcpy(mensagem, linhas[i].data());
 		
 		buffer.str(linhas[i].c_str());
-		buffer.getline(msg, MSG_TAM, '\n');
+		buffer.str.getline(msg, TAM, '\n');
 		buffer.str(msg);
 		
 		buffer >> metodo;
@@ -54,18 +71,18 @@ void comunicar(int socket){
 			if ((!resto.empty()) || (protocolo.empty()) || (truk.empty())){
 				codigo = "400";
 				descricao = "BAD REQUEST";
-				msg= "Seu navegador mandou um pedido que o Servidor não conseguiu entender.";
+				mensagem= "Seu navegador mandou um pedido que o Servidor não conseguiu entender.";
 			}
 			else if (verificaProtocolo(protocolo) == 0){
 				codigo = "505";
 				descricao = "HTTP Version Not Supported";
 				mensagem = "O Servidor não suporta a versão do protocolo HTTP que é utilizado na mensagem.";
 			}
-			else if (verificaMethod(metodo) == -1 ){
-				m = verificaMethod(metodo);				
+			else if (verificaMetodo(metodo) == -1 ){
+				m = verificaMetodo(metodo);				
 				codigo = "405";
 				descricao = "Method Not Allowed";
-				mensagem = "O metodo " + method + " não esta apto na URL " + truk + " .";
+				mensagem = "O metodo " + metodo + " não esta apto na URL " + truk + " .";
 			}else{
 				erro = 0;
 			}
@@ -77,7 +94,7 @@ void comunicar(int socket){
 			else{
 			
 				//aqui forma o caminho para o arquivo desejado
-				truk = this->dir + truk;
+				truk = dir + truk;
 				
 				//aqui verifica qual metodo que foi pedido
 				if (m == 0){
@@ -91,12 +108,12 @@ void comunicar(int socket){
 	}
 	
 	//aqui fecha o socket
-	close (c_socket);
+	close (socket);
 	return 0;
 }
 
 int verificaProtocolo(string &protocolo){
-	if (protocol == "HTTP/1.1"){
+	if (protocolo == "HTTP/1.1"){
 		return 1;
 	}
 	return 0;
@@ -175,14 +192,14 @@ void GET(string arquivo, int socket){
 		exit(0);
 	}
 	else{
-		string type=pegaExtensao(arquivo);
+		string type = pegaExtensao(arquivo);
 		if(type==NULL){
 			cout << "\nErro Extensão Inesistente";
 			close(socket);
 			exit(0);
 		}
 		
-		montaCabecalho(protocolo,"200","OK","Página Carregada",socket,type,0);
+		montaCabecalho("HTTP/1.1","200","OK","Página Carregada",socket,type,0);
 		in.getline(ficheiro,1000,'\n');
 		dados.clear();
 	
@@ -209,7 +226,7 @@ void HEAD(string arquivo, int socket){
 			exit(0);
 		}
 		
-		montaCabecalho(protocolo,"404","Not Found","Ficheiro não Encontrado",socket,type,0);
+		montaCabecalho("HTTP/1.1","404","Not Found","Ficheiro não Encontrado",socket,type,0);
 	}
 	else{
 		string type=pegaExtensao(arquivo);
@@ -238,5 +255,11 @@ string pegaExtensao(string &arquivo){
 	else if(extensao==".au") return "audio/basic";
 	else if((extensao==".mpeg") || (extensao==".mpg")) return "video/mpeg";
 	else if(extensao==".avi") return "video/x-msvideo";
-	else return "";
+	else return NULL;
+}
+
+void conectar(void *sockk){
+			struct sock *socket;
+			socket=(struct sock*)sockk;
+			return (void*)comunicar(socket->new_socket);
 }
