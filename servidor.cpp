@@ -58,7 +58,7 @@ void comunicar(int socket){
 	bool b, erro;
 	int i, len;
 	char mensagem[TAM+1];
-	string metodo, truk, resto, protocolo, tipo, tprotocolo;
+	string metodo, truk, resto, protocolo, tipo, tprotocolo, codigo, descrição, msg;
 	vector<string> linhas;
 	istringstream buffer;
 	
@@ -100,10 +100,66 @@ void comunicar(int socket){
 		buffer >> resto;
 		tprotocolo = "HTTP/1.1";
 		tipo = "text/html";
+		erro = 1;
+
+		//aqui verifica se foi digitada uma linha em branco pelo cliente entre os pedidos
+		if (!metodo.empty()){
+			if ((!resto.empty()) || (protocolo.empty()) || (truk.empty())){
+				codigo = "400";
+				descricao = "BAD REQUEST";
+				msg= "Seu navegador mandou um pedido que o Servidor não conseguiu entender.";
+			}
+			else if (verificaProtocolo(protocolo) == 0){
+				codigo = "505";
+				descricao = "HTTP Version Not Supported";
+				mensagem = "O Servidor não suporta a versão do protocolo HTTP que é utilizado na mensagem.";
+			}
+			else if (verificaMethod(metodo) == -1 ){
+				m = verificaMethod(metodo);				
+				codigo = "405";
+				descricao = "Method Not Allowed";
+				mensagem = "O metodo " + method + " não esta apto na URL " + truk + " .";
+			}else{
+				erro = 0;
+			}
+			
+			//aqui forma o caminho para o arquivo desejado
+			truk = this->dir + truk;
+			
+			//aqui verifica qual metodo que foi pedido
+			if (m == 0){
+				HEAD(truk, c_socket);
+			}
+			else{
+				GET(truk, c_socket);
+			}
+		}
+	}
+	
+	//aqui fecha o socket
+	close (c_socket);
+	return 0;
 }
 
 static void *conectar(void *sock){ //Esse metodo foi feito para auxiliar na criação das threads
 			struct sock *socket;
 			socket = (struct sock*)sock;
 			return comunicar(socket->new_socket);
+}
+
+int Servidor::verificaProtocolo(string &protocolo){
+	if (protocol == "HTTP/1.1"){
+		return 1;
+	}
+	return 0;
+}
+
+int Servidor::verificaMetodo(string &metodo){
+	if (metodo == "HEAD"){
+		return 1;
+	}
+	if (metodo == "GET"){
+		return 2;
+	}
+	return -1;
 }
