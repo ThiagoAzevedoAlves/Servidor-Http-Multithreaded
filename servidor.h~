@@ -5,6 +5,7 @@
 
 using namespace std;
 
+void conectar(void *sockk);
 void *comunicar(int socket);
 int verificaMetodo(string &metodo);
 int verificaProtocolo(string &protocolo);
