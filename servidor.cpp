@@ -1,10 +1,13 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
+#include <string>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <pthread.h>
 
 using namespace std;
 
@@ -46,5 +49,39 @@ int main(int argc, char *argv[]){
 		}else{
 			cout << "Conexao estabelecida." << endl;
 		}
+		pthread_t thread;
+		pthread_create(&thread, NULL, &conectar, (void*)novosock);
 	}
+}
+
+void comunicar(int socket){
+	bool b;
+	int i;
+	char mensagem[TAM+1];
+	string metodo, protocolo;
+	vector<string> linhas;
+	istringstream buffer;
+	
+	//trata os pedidos	
+
+	b = true;
+	for(i=0 ; ; i++){
+		if (recv(socket, mensagem, TAM, 0) == -1){
+			cout << "Erro ao realizar o recieve." << endl;
+			exit(1);
+		}
+		linhas.push_back(msg);
+		if (mensagem[0] == '\r'){
+			b = false;
+			linhas.pop_back();
+			break;
+		}
+		mensagem[0] = '\0';
+	}
+}
+
+static void *conectar(void *sock){ //Esse metodo foi feito para auxiliar na criação das threads
+			struct sock *socket;
+			socket = (struct sock*)sock;
+			return comunicar(socket->new_socket);
 }
