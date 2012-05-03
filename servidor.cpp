@@ -55,10 +55,10 @@ int main(int argc, char *argv[]){
 }
 
 void comunicar(int socket){
-	bool b;
-	int i;
+	bool b, erro;
+	int i, len;
 	char mensagem[TAM+1];
-	string metodo, protocolo;
+	string metodo, truk, resto, protocolo, tipo, tprotocolo;
 	vector<string> linhas;
 	istringstream buffer;
 	
@@ -78,6 +78,28 @@ void comunicar(int socket){
 		}
 		mensagem[0] = '\0';
 	}
+
+	//aqui verifica os erros e executa os pedidos 
+	len = linhas.size();
+	for (i = 0; i < len; i++){
+		buffer.clear();
+		protocolo.clear();
+		truk.clear();
+		resto.clear(); 
+		metodo.clear();		
+
+		strcpy(mensagem, linhas[i].data());
+		
+		buffer.str(linhas[i].c_str());
+		buffer.getline(msg, MSG_TAM, '\n');
+		buffer.str(msg);
+		
+		buffer >> metodo;
+		buffer >> truk;
+		buffer >> protocolo;
+		buffer >> resto;
+		tprotocolo = "HTTP/1.1";
+		tipo = "text/html";
 }
 
 static void *conectar(void *sock){ //Esse metodo foi feito para auxiliar na criação das threads
