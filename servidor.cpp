@@ -122,16 +122,23 @@ void comunicar(int socket){
 			}else{
 				erro = 0;
 			}
-			
-			//aqui forma o caminho para o arquivo desejado
-			truk = this->dir + truk;
-			
-			//aqui verifica qual metodo que foi pedido
-			if (m == 0){
-				HEAD(truk, c_socket);
+
+			//avisa sobre erro
+			if (erro){
+				montaCabecalho(protocolo, codigo, descricao, mensagem, socket, tipo,1);
 			}
 			else{
-				GET(truk, c_socket);
+			
+				//aqui forma o caminho para o arquivo desejado
+				truk = this->dir + truk;
+				
+				//aqui verifica qual metodo que foi pedido
+				if (m == 0){
+					HEAD(truk, c_socket);
+				}
+				else{
+					GET(truk, c_socket);
+				}
 			}
 		}
 	}
@@ -147,14 +154,14 @@ static void *conectar(void *sock){ //Esse metodo foi feito para auxiliar na cria
 			return comunicar(socket->new_socket);
 }
 
-int Servidor::verificaProtocolo(string &protocolo){
+int verificaProtocolo(string &protocolo){
 	if (protocol == "HTTP/1.1"){
 		return 1;
 	}
 	return 0;
 }
 
-int Servidor::verificaMetodo(string &metodo){
+int verificaMetodo(string &metodo){
 	if (metodo == "HEAD"){
 		return 1;
 	}
@@ -162,4 +169,48 @@ int Servidor::verificaMetodo(string &metodo){
 		return 2;
 	}
 	return -1;
+}
+
+void montaCabecalho(string protocolo,string codigo, string descricao, string mensagem, int socket, string type, int erro){
+	
+	string cabecalho;
+	time_t hora;
+   char data[50];
+   hora=time(NULL);
+   strftime(data, sizeof(data), "%a, %d/%m/%Y %H:%M:%S", gmtime(&hora));
+	
+	cabecalho=protocolo;
+	cabecalho+=" ";
+	cabecalho+=codigo;
+	cabecalho+=" ";
+	cabecalho+=descricao;
+	cabecalho+="\nConnection: close\nDate: ";
+	cabecalho+=data;
+	cabecalho+=" \nServer: Servidor-Http-Multithreaded";
+	cabecalho+="\nAllow: GET, HEAD";
+	cabecalho+="\nContent-Type: ";
+	cabecalho+=type;
+	cabecalho+="\n";
+	send(socket, cabecalho.data(), cabecalho.size(),0);
+	cout << cabecalho;
+	
+	
+	if(erro){
+		cabecalho.clear();
+		
+		cabecalho="\n\n<HTML>\n<HEAD>\n<title>";
+        cabecalho+=codigo;
+        cabecalho+=" ";
+        cabecalho+=descricao;
+        cabecalho+="</titulo>\n</HEAD>\n<BODY>\n<H4>";
+        cabecalho+=codigo;
+        cabecalho+=" ";
+        cabecalho+=descricao;
+        cabecalho+="</H4>\n";
+        cabecalho+=mensagem;
+        cabecalho+="\n</BODY>\n</HTML>\n";
+        send(socket, cabecalho.data(), cabecalho.size(),0);
+        cout << cabecalho;		
+	}
+	
 }
