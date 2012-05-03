@@ -1,3 +1,6 @@
+
+//SERIVIDOR HTTP 1.1 DESENVOLVIDO POR THIAGO AZEVEDO E BRUNO IOST//
+
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>

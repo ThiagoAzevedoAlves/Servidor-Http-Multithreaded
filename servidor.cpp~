@@ -12,8 +12,6 @@
 #include <sstream>
 #include "servidor.h"
 
-#define TAM 1000
-
 using namespace std;
 
 int main(int argc, char *argv[]){
