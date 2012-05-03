@@ -11,6 +11,14 @@
 
 using namespace std;
 
+void *comunication(int socket);
+int verificaMethod(string &metodo);
+int verificaProtocol(string &protocolo);
+void montaCabecalho(string &protocolo, string &codigo, string &descricao, string &mensagem, int &socket, string &type, int erro);
+void HEAD(string &arquivo, int socket);
+void GET(string &arquivo, int socket);
+string pegaExtensao(string &arquivo);
+
 int main(int argc, char *argv[]){
 	//Testa se a chamada do servidor foi executada corretamente.	
 	if (argc != 3){
@@ -134,10 +142,10 @@ void comunicar(int socket){
 				
 				//aqui verifica qual metodo que foi pedido
 				if (m == 0){
-					HEAD(truk, c_socket);
+					HEAD(truk, socket);
 				}
 				else{
-					GET(truk, c_socket);
+					GET(truk, socket);
 				}
 			}
 		}
@@ -213,4 +221,89 @@ void montaCabecalho(string protocolo,string codigo, string descricao, string men
         cout << cabecalho;		
 	}
 	
+}
+
+void GET(string arquivo, int socket){
+	
+	ifstream in(arquivo.data());
+	string dados;
+	char ficheiro[1000];
+	
+	if(!in){
+		string type=pegaExtensao(arquivo);
+		if(type==NULL){
+			cout << "\nErro Extensão Inesistente";
+			close(socket);
+			exit(0);
+		}
+		
+		montaCabecalho(protocolo,"404","Not Found","Ficheiro não Encontrado",socket,type,1);
+		close(socket);
+		exit(0);
+	}
+	else{
+		string type=pegaExtensao(arquivo);
+		if(type==NULL){
+			cout << "\nErro Extensão Inesistente";
+			close(socket);
+			exit(0);
+		}
+		
+		montaCabecalho(protocolo,"200","OK","Página Carregada",socket,type,0);
+		in.getline(ficheiro,1000,'\n');
+		dados.clear();
+	
+		while(in){
+			dados.clear();
+			dados=ficheiro;
+			write(socket,dados.data(),dados.size());
+			in.getline(ficheiro,1000,'\n');
+			//cout << "\n" << dados;
+		}
+	}
+	in.close();
+}
+	
+void HEAD(string arquivo, int socket){
+	
+	ifstream in(arquivo.data());
+	
+	if(!in){
+		string type=pegaExtensao(arquivo);
+		if(type==NULL){
+			cout << "\nErro Extensão Inesistente";
+			close(socket);
+			exit(0);
+		}
+		
+		montaCabecalho(protocolo,"404","Not Found","Ficheiro não Encontrado",socket,type,0);
+	}
+	else{
+		string type=pegaExtensao(arquivo);
+		if(type==NULL){
+			cout << "\nErro Extensão Inesistente";
+			close(socket);
+			exit(0);
+		}
+		
+		montaCabecalho(protocolo,"200","OK","Página Carregada",socket,type,0);
+	}
+	in.close();
+}
+
+string Servidor::pegaExtensao(string &arquivo){
+	string extensao;
+	extensao=strrchr(arquivo.data(),'.');
+	if((extensao==".html") || (extensao==".htm"))return "text/html";
+	else if(extensao==".css") return "text/css";
+	else if(extensao==".php") return "text/php";
+	else if((extensao==".jpeg") || (extensao==".jpg"))return "image/jpeg";
+	else if(extensao==".gif")return "image/gif";
+	else if(extensao==".png")return "image/png";
+	else if(extensao==".mp3") return "audio/mpeg";
+	else if(extensao==".wav") return "audio/wav";
+	else if(extensao==".au") return "audio/basic";
+	else if((extensao==".mpeg") || (extensao==".mpg")) return "video/mpeg";
+	else if(extensao==".avi") return "video/x-msvideo";
+	else return "";
 }
